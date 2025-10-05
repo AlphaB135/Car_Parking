@@ -8,25 +8,24 @@ class ParkingSelectionScreen extends StatelessWidget {
   static const List<Map<String, dynamic>> _fallbackLots = [
     {
       'id': 'A',
-      'title': 'เธฅเธฒเธ A - เธญเธฒเธเธฒเธฃ LC',
-      'location': 'เนเธเธฅเนเธญเธฒเธเธฒเธฃ LC',
+      'title': 'ลาน A - อาคาร LC',
+      'location': 'อาคารเรียน LC',
       'route': '/parkingA',
       'available': 6,
       'total': 10,
     },
     {
       'id': 'B',
-      'title': 'เธฅเธฒเธ B - เธญเธฒเธเธฒเธฃเธงเธดเธ—เธขเธฒเธจเธฒเธชเธ•เธฃเน',
-      'location':
-          'เนเธเธฅเนเธญเธฒเธเธฒเธฃเธงเธดเธ—เธขเธฒเธจเธฒเธชเธ•เธฃเน',
+      'title': 'ลาน B - อาคารวิศวกรรม',
+      'location': 'หน้าอาคารวิศวกรรม',
       'route': '/parkingB',
       'available': 2,
       'total': 10,
     },
     {
       'id': 'C',
-      'title': 'เธฅเธฒเธ C - เธญเธฒเธเธฒเธฃเธ•เธฑเธงเธขเธน',
-      'location': 'เนเธเธฅเนเธชเธงเธเธเนเธฒเธขเธฒเธ',
+      'title': 'ลาน C - ศูนย์กีฬา',
+      'location': 'หน้าศูนย์กีฬา',
       'route': '/parkingC',
       'available': 0,
       'total': 10,
@@ -82,7 +81,7 @@ class ParkingSelectionScreen extends StatelessWidget {
                 : <String, dynamic>{};
 
             final id = entry.key.toString();
-            final title = (raw['name'] ?? meta['name'] ?? 'เธฅเธฒเธ $id')
+            final title = (raw['name'] ?? meta['name'] ?? 'ลาน $id')
                 .toString();
             final location = (raw['location'] ?? meta['location'] ?? '')
                 .toString();
@@ -151,7 +150,7 @@ class ParkingSelectionScreen extends StatelessWidget {
   }) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('เธฅเธฒเธเธเธญเธ”เธฃเธ–'),
+        title: const Text('เลือกที่จอดรถ'),
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: Colors.black,
@@ -194,7 +193,7 @@ class ParkingSelectionScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'เธฅเธฒเธเธเธญเธ”เธฃเธ–เธ—เธตเนเนเธเธฅเน',
+                          'เลือกที่จอดรถที่พร้อมใช้งาน',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -202,14 +201,14 @@ class ParkingSelectionScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          '$totalAvailable / $totalSpots เธ—เธตเนเธงเนเธฒเธ',
+                          'ว่าง $totalAvailable / $totalSpots ช่อง',
                           style: TextStyle(color: Colors.grey[700]),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           hasLiveData
-                              ? 'เธเนเธญเธกเธนเธฅเธเธฒเธเธเธฒเธเธเนเธญเธกเธนเธฅเนเธเธเน€เธฃเธตเธขเธฅเนเธ—เธกเน'
-                              : 'เธเนเธญเธกเธนเธฅเธ•เธฑเธงเธญเธขเนเธฒเธ (เนเธซเธกเธ”เธญเธญเธเนเธฅเธเน)',
+                              ? 'ข้อมูลสดจาก Firebase Realtime Database'
+                              : 'ใช้ข้อมูลจำลอง (โหมดออฟไลน์)',
                           style: TextStyle(
                             color: hasLiveData
                                 ? const Color(0xFF1E8E6B)
@@ -224,9 +223,9 @@ class ParkingSelectionScreen extends StatelessWidget {
                     onPressed: () =>
                         Navigator.pushNamed(context, '/parking-map'),
                     icon: const Icon(Icons.location_on, size: 18),
-                    label: FittedBox(
+                    label: const FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: const Text('เนเธชเธ”เธเธเธเนเธเธเธ—เธตเน'),
+                      child: Text('เปิดแผนที่'),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4285F4),
@@ -342,7 +341,7 @@ class ParkingSelectionScreen extends StatelessWidget {
                                 if (lastUpdated != null) ...[
                                   const SizedBox(height: 6),
                                   Text(
-                                    'เธญเธฑเธเน€เธ”เธ•เธฅเนเธฒเธชเธธเธ” $lastUpdated',
+                                    'อัปเดตล่าสุด $lastUpdated',
                                     style: TextStyle(
                                       color: Colors.grey[500],
                                       fontSize: 12,
@@ -373,7 +372,7 @@ class ParkingSelectionScreen extends StatelessWidget {
                                 if (lastUpdated != null) ...[
                                   const SizedBox(height: 6),
                                   Text(
-                                    'เธญเธฑเธเน€เธ”เธ•เธฅเนเธฒเธชเธธเธ” $lastUpdated',
+                                    'อัปเดตล่าสุด $lastUpdated',
                                     style: TextStyle(
                                       color: Colors.grey[500],
                                       fontSize: 12,
@@ -396,8 +395,8 @@ class ParkingSelectionScreen extends StatelessWidget {
                                     const SizedBox(width: 8),
                                     Text(
                                       isFull
-                                          ? 'เน€เธ•เนเธก'
-                                          : '$available เธ—เธตเนเธงเนเธฒเธ',
+                                          ? 'เต็ม'
+                                          : 'ว่าง $available ช่อง',
                                       style: TextStyle(
                                         color: isFull
                                             ? const Color(0xFFB00020)
@@ -476,9 +475,7 @@ class ParkingSelectionScreen extends StatelessWidget {
                                         child: FittedBox(
                                           fit: BoxFit.scaleDown,
                                           child: Text(
-                                            isFull
-                                                ? 'เน€เธ•เนเธก'
-                                                : '$percentage%',
+                                            isFull ? 'เต็ม' : '$percentage%',
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,

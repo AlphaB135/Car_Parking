@@ -37,7 +37,7 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('เนเธเธเธ—เธตเน'),
+        title: const Text('แผนที่ลานจอด'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
       ),

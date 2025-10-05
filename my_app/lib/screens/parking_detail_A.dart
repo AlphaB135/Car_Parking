@@ -124,7 +124,7 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธฅเธฒเธเธเธญเธ”เธฃเธ–',
+              'รายละเอียดลานจอด',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -132,7 +132,7 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
               ),
             ),
             Text(
-              'เธเนเธญเธกเธนเธฅเนเธเธเน€เธฃเธตเธขเธฅเนเธ—เธกเน',
+              'ข้อมูลลานจอดแบบเรียลไทม์',
               style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
           ],
@@ -163,9 +163,9 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'เธฅเธฒเธ A - เธญเธฒเธเธฒเธฃ LC',
-                          style: TextStyle(
+                        Text(
+                          _lotName,
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
@@ -190,7 +190,7 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
                               ),
                               SizedBox(width: 4),
                               Text(
-                                'เธฃเธตเน€เธเธฃเธ',
+                                'ข้อมูลสด',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Color(0xFF4285F4),
@@ -211,18 +211,18 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
                           color: Colors.grey[500],
                         ),
                         const SizedBox(width: 4),
-                        const Text(
-                          'เนเธเธฅเนเธญเธฒเธเธฒเธฃ LC',
-                          style: TextStyle(fontSize: 14, color: Colors.black54),
+                        Text(
+                          _lotLocation,
+                          style: const TextStyle(fontSize: 14, color: Colors.black54),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
                     Row(
                       children: [
-                        _buildLegendItem('เธงเนเธฒเธ', Colors.green),
+                        _buildLegendItem('ว่าง', Colors.green),
                         const SizedBox(width: 24),
-                        _buildLegendItem('เนเธกเนเธงเนเธฒเธ', Colors.red),
+                        _buildLegendItem('ไม่ว่าง', Colors.red),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -255,8 +255,8 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'เธเนเธญเธกเธนเธฅเน€เธเธดเนเธกเน€เธ•เธดเธก',
+                              const Text(
+                                'ข้อมูลเพิ่มเติม',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -265,8 +265,8 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'เธฅเธฒเธเธเธญเธ”เธฃเธ–เธชเธณเธซเธฃเธฑเธเธญเธฒเธเธฒเธฃเธขเนเนเธฅเธฐเน€เธเนเธฒเธซเธเนเธฒเธ—เธตเนเธเธ“เธฐเธงเธดเธจเธงเธเธฃเธฃเธก',
-                                style: TextStyle(
+                                _lotDescription,
+                                style: const TextStyle(
                                   fontSize: 12,
                                   color: Colors.black54,
                                 ),
@@ -390,9 +390,7 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
           } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text(
-                  'เธเธฒเธฃเน€เธเธฅเธตเนเธขเธเธชเธ–เธฒเธเธฐเธฅเนเธกเน€เธซเธฅเธง',
-                ),
+                content: Text('อัปเดตสถานะช่องจอดไม่สำเร็จ'),
               ),
             );
           }

@@ -35,7 +35,9 @@ class _HomeScreenState extends State<HomeScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('เนเธซเธกเธ”เธเธณเธฅเธญเธ: เธเธฑเธเธ—เธถเธเธเนเธญเธกเธนเธฅเธชเธณเน€เธฃเนเธ')),
+          const SnackBar(
+            content: Text('โหมดจำลอง: ใช้ฐานข้อมูลจำลองแทน Firebase'),
+          ),
         );
       });
     }
@@ -74,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // โ… ref เนเธเธขเธฑเธ Realtime Database
+  // อ้างอิง Realtime Database จริงเมื่อเปิด Firebase
   final DatabaseReference? _db = firebaseEnabled
       ? FirebaseDatabase.instance.ref()
       : null;
@@ -87,8 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
   static const List<_Lot> _seedLots = [
     _Lot(
       id: 'A',
-      title: 'เธฅเธฒเธ A - เธญเธฒเธเธฒเธฃ LC',
-      location: 'เนเธเธฅเนเธญเธฒเธเธฒเธฃ LC',
+      title: 'ลานจอด A - อาคาร LC',
+      location: 'อาคารเรียน LC',
       capacity: 10,
       occupied: 4,
       available: 6,
@@ -96,8 +98,8 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     _Lot(
       id: 'B',
-      title: 'เธฅเธฒเธ B - เธญเธฒเธเธฒเธฃเธงเธดเธ—เธขเธฒเธจเธฒเธชเธ•เธฃเน',
-      location: 'เนเธเธฅเนเธญเธฒเธเธฒเธฃเธงเธดเธ—เธขเธฒเธจเธฒเธชเธ•เธฃเน',
+      title: 'ลานจอด B - อาคารวิศวกรรม',
+      location: 'หน้าอาคารวิศวกรรม',
       capacity: 10,
       occupied: 8,
       available: 2,
@@ -105,8 +107,8 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     _Lot(
       id: 'C',
-      title: 'เธฅเธฒเธ C - เธญเธฒเธเธฒเธฃเธ•เธฑเธงเธขเธน',
-      location: 'เนเธเธฅเนเธชเธงเธเธเนเธฒเธขเธฒเธ',
+      title: 'ลานจอด C - ศูนย์กีฬา',
+      location: 'หน้าศูนย์กีฬา',
       capacity: 10,
       occupied: 10,
       available: 0,
@@ -194,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
           : <String, dynamic>{};
 
       final id = entry.key.toString();
-      final name = (map['name'] ?? meta['name'] ?? 'เธฅเธฒเธ $id').toString();
+      final name = (map['name'] ?? meta['name'] ?? 'ลานจอด $id').toString();
       final location =
           (map['location'] ?? meta['location'] ?? '').toString();
 
@@ -253,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // === เธเธณเธเธงเธ“เธชเธฃเธธเธเธญเธฑเธ•เนเธเธกเธฑเธ•เธด ===
+    // === สถิติโดยรวมของลานจอด ===
     final int totalLots = _lots.length;
     final int totalOccupied = _lots.fold(0, (sum, l) => sum + l.occupied);
     final int totalFree = _lots.fold(0, (sum, l) => sum + l.available);
@@ -279,7 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'เธชเธกเธฒเธฃเนเธ—เธเธฒเธฃเนเธเธเธดเนเธ',
+                  'ระบบจอดรถอัจฉริยะ',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -287,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 Text(
-                  'เธขเธดเธเธ”เธตเธ•เนเธญเธเธฃเธฑเธเธชเธนเนเธชเธกเธฒเธฃเนเธ—เธเธฒเธฃเนเธเธเธดเนเธ',
+                  'ติดตามสถานะที่จอดแบบเรียลไทม์',
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
@@ -320,8 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-
-      // โ… เธเธธเนเธกเธ—เธ”เธชเธญเธเน€เธเธตเธขเธเธเนเธฒ
+      // ปุ่มสำหรับรีเฟรชข้อมูลหรือส่งคำสั่ง seed ไปยังฐานข้อมูล
       floatingActionButton: FloatingActionButton(
         onPressed: _seedAgain,
         child: const Icon(Icons.cloud_upload),
@@ -329,10 +330,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
       body: Column(
         children: [
-          // โ… เนเธ–เธเธชเธ–เธฒเธเธฐ Firebase (เธญเนเธฒเธ realtime)
+          // แสดงสถานะการเชื่อมต่อ Firebase (Realtime Database)
           _firebaseStatusBanner(),
 
-          // โฌ๏ธ เธงเธฒเธเธเธญเธเน€เธ—เธเธ•เนเน€เธ”เธดเธกเธเธญเธเธเธธเธ“เนเธงเนเธ•เธฃเธเธเธตเน
+          // เนื้อหาหลักของแดชบอร์ดที่แสดงสถิติและรายการลานจอด
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(16),
@@ -341,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                       child: _buildStatCard(
-                        'เธ—เธตเนเธเธญเธ”เธฃเธ–เธงเนเธฒเธ',
+                        'ที่จอดว่างทั้งหมด',
                         '$totalFree',
                         Colors.green,
                         Icons.trending_up,
@@ -350,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: _buildStatCard(
-                        'เธ—เธตเนเธเธญเธ”เน€เธ•เนเธก',
+                        'ที่ถูกใช้งาน',
                         '$totalOccupied',
                         const Color(0xFF4285F4),
                         Icons.location_on,
@@ -363,7 +364,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                       child: _buildStatCard(
-                        'เธฅเธฒเธเธเธญเธ”เธฃเธ–',
+                        'จำนวนลานจอด',
                         '$totalLots',
                         Colors.orange,
                         Icons.location_on,
@@ -396,7 +397,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'เธฅเธฒเธเธเธญเธ”เธฃเธ–',
+                        'สรุปสถานะลานจอด',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -417,7 +418,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             final statusColor =
                                 isFull ? Colors.red : Colors.green;
                             final capacityLabel =
-                                'เธงเนเธฒเธ ${lot.available}/${lot.capacity}';
+                                'ว่าง ${lot.available}/${lot.capacity}';
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 16),
                               child: _buildParkingLotItem(
@@ -511,7 +512,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Seed again action used by the FAB: re-seed fake DB or write a fresh timestamp to Firebase
-  Future<void> _seedAgain() async {
   Future<void> _seedAgain() async {
     if (!firebaseEnabled) {
       try {
@@ -614,7 +614,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          location.isEmpty ? 'โ€”' : location,
+                          location.isEmpty ? '-' : location,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -628,7 +628,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (lastUpdated != null) ...[
                     const SizedBox(height: 4),
                     Text(
-                      'เธญเธฑเธเน€เธ”เธ•เธฅเนเธฒเธชเธธเธ” $lastUpdated',
+                      'อัปเดตล่าสุด $lastUpdated',
                       style:
                           TextStyle(fontSize: 11, color: Colors.grey[500]),
                     ),
@@ -645,6 +645,63 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _liveFreeCountWidget(
+    BuildContext context,
+    String lotId,
+    Color fallbackColor,
+  ) {
+    final stream = Rtdb().lotSpots(lotId);
+    return StreamBuilder<List<bool>>(
+      stream: stream,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Text(
+            'ข้อมูลไม่พร้อม',
+            style: TextStyle(color: Colors.red.shade400, fontSize: 12),
+          );
+        }
+
+        final spots = snapshot.data;
+        if (spots == null) {
+          return Row(
+            children: const [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              SizedBox(width: 8),
+              Text('กำลังโหลด...', style: TextStyle(fontSize: 12)),
+            ],
+          );
+        }
+
+        final total = spots.length;
+        final occupied = spots.where((e) => e).length;
+        final available = total - occupied;
+        final color = available <= 0 ? Colors.red.shade400 : fallbackColor;
+        final statusLabel = available <= 0
+            ? 'เต็ม'
+            : 'ว่าง $available จาก $total';
+
+        return Row(
+          children: [
+            Icon(Icons.local_parking, size: 16, color: color),
+            const SizedBox(width: 6),
+            Text(
+              statusLabel,
+              style: TextStyle(
+                fontSize: 12,
+                color: color,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   String _formatUpdatedAt(int millis) {
     final dt = DateTime.fromMillisecondsSinceEpoch(millis).toLocal();
     final two = (int v) => v.toString().padLeft(2, '0');
@@ -652,8 +709,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final timeLabel = '${two(dt.hour)}:${two(dt.minute)}:${two(dt.second)}';
     return '$dateLabel $timeLabel';
   }
+}
 
-// เนเธเธฃเธเธชเธฃเนเธฒเธเธเนเธญเธกเธนเธฅเธฅเธฒเธ
+// โครงสร้างข้อมูลของลานจอด
 class _Lot {
   final String id;
   final String title;
@@ -676,6 +734,3 @@ class _Lot {
 
   int get freeSpots => available;
 }
-
-
-

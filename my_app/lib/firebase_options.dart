@@ -25,24 +25,24 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // TODO: Replace the placeholder values below with your project's values.
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'REPLACE_WITH_YOUR_API_KEY',
-    authDomain: 'REPLACE_WITH_YOUR_PROJECT.firebaseapp.com',
-    databaseURL: 'https://REPLACE_WITH_YOUR_PROJECT.firebaseio.com',
-    projectId: 'REPLACE_WITH_YOUR_PROJECT',
-    storageBucket: 'REPLACE_WITH_YOUR_PROJECT.appspot.com',
-    messagingSenderId: 'REPLACE_WITH_MESSAGING_SENDER_ID',
-    appId: 'REPLACE_WITH_APP_ID',
-    measurementId: 'REPLACE_WITH_MEASUREMENT_ID',
+    apiKey: 'AIzaSyCpUlDqMxgqS43xx2n3S8qbubxWkp__YaU',
+    authDomain: 'myapp-292ad.firebaseapp.com',
+    databaseURL: 'https://myapp-292ad-default-rtdb.firebaseio.com',
+    projectId: 'myapp-292ad',
+    storageBucket: 'myapp-292ad.firebasestorage.app',
+    messagingSenderId: '328892986991',
+    appId: '1:328892986991:web:1f2dbdf5e2168c1ce0ff9a',
+    measurementId: 'G-8GJRZLD3S7',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'REPLACE_WITH_ANDROID_API_KEY',
-    appId: 'REPLACE_WITH_ANDROID_APP_ID',
-    messagingSenderId: 'REPLACE_WITH_MESSAGING_SENDER_ID',
-    projectId: 'REPLACE_WITH_YOUR_PROJECT',
-    storageBucket: 'REPLACE_WITH_YOUR_PROJECT.appspot.com',
+    apiKey: 'AIzaSyATXhn5wX1-of1vk6AkzH0VdayqUvb5VTA',
+    appId: '1:328892986991:android:ead831136e73a8fce0ff9a',
+    messagingSenderId: '328892986991',
+    projectId: 'myapp-292ad',
+    databaseURL: 'https://myapp-292ad-default-rtdb.firebaseio.com',
+    storageBucket: 'myapp-292ad.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

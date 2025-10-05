@@ -1,0 +1,367 @@
+{
+  "devices": {
+    "esp32-A": {
+      "health": {
+        "ip": "192.168.1.101"
+      },
+      "last_seen": 1756992700600,
+      "lot": "A",
+      "status": "online"
+    },
+    "esp32-B": {
+      "health": {
+        "ip": "192.168.1.102"
+      },
+      "last_seen": 1756992700600,
+      "lot": "B",
+      "status": "online"
+    },
+    "esp32-C": {
+      "health": {
+        "ip": "192.168.1.103"
+      },
+      "last_seen": 1756992700600,
+      "lot": "C",
+      "status": "online"
+    }
+  },
+  "lot_summaries": {
+    "A": {
+      "available": 6,
+      "occupied": 4,
+      "updated_at": 1756992700600
+    },
+    "B": {
+      "available": 2,
+      "occupied": 8,
+      "updated_at": 1756992700600
+    },
+    "C": {
+      "available": 0,
+      "occupied": 10,
+      "updated_at": 1756992700600
+    }
+  },
+  "lots": {
+    "A": {
+      "config": {
+        "created_at": 1756992700600,
+        "heartbeat_timeout_ms": 30000,
+        "smoothing_window": 3,
+        "threshold_cm": 25,
+        "updated_at": 1756992700600
+      },
+      "location": "ใกล้อาคาร LC",
+      "name": "ลาน A - อาคาร LC",
+      "sensors_map": {
+        "10": {
+          "channel": 10,
+          "device": "esp32-A"
+        },
+        "01": {
+          "channel": 1,
+          "device": "esp32-A"
+        },
+        "02": {
+          "channel": 2,
+          "device": "esp32-A"
+        },
+        "03": {
+          "channel": 3,
+          "device": "esp32-A"
+        },
+        "04": {
+          "channel": 4,
+          "device": "esp32-A"
+        },
+        "05": {
+          "channel": 5,
+          "device": "esp32-A"
+        },
+        "06": {
+          "channel": 6,
+          "device": "esp32-A"
+        },
+        "07": {
+          "channel": 7,
+          "device": "esp32-A"
+        },
+        "08": {
+          "channel": 8,
+          "device": "esp32-A"
+        },
+        "09": {
+          "channel": 9,
+          "device": "esp32-A"
+        }
+      },
+      "total_spots": 10
+    },
+    "B": {
+      "config": {
+        "created_at": 1756992700600,
+        "heartbeat_timeout_ms": 30000,
+        "smoothing_window": 3,
+        "threshold_cm": 25,
+        "updated_at": 1756992700600
+      },
+      "location": "ใกล้อาคารวิทยาศาสตร์",
+      "name": "ลาน B - อาคารวิทยาศาสตร์",
+      "sensors_map": {
+        "10": {
+          "channel": 10,
+          "device": "esp32-B"
+        },
+        "01": {
+          "channel": 1,
+          "device": "esp32-B"
+        },
+        "02": {
+          "channel": 2,
+          "device": "esp32-B"
+        },
+        "03": {
+          "channel": 3,
+          "device": "esp32-B"
+        },
+        "04": {
+          "channel": 4,
+          "device": "esp32-B"
+        },
+        "05": {
+          "channel": 5,
+          "device": "esp32-B"
+        },
+        "06": {
+          "channel": 6,
+          "device": "esp32-B"
+        },
+        "07": {
+          "channel": 7,
+          "device": "esp32-B"
+        },
+        "08": {
+          "channel": 8,
+          "device": "esp32-B"
+        },
+        "09": {
+          "channel": 9,
+          "device": "esp32-B"
+        }
+      },
+      "total_spots": 10
+    },
+    "C": {
+      "config": {
+        "created_at": 1756992700600,
+        "heartbeat_timeout_ms": 30000,
+        "smoothing_window": 3,
+        "threshold_cm": 25,
+        "updated_at": 1756992700600
+      },
+      "location": "ใกล้สวน",
+      "name": "ลาน C - อาคารตัวยู",
+      "sensors_map": {
+        "10": {
+          "channel": 10,
+          "device": "esp32-C"
+        },
+        "01": {
+          "channel": 1,
+          "device": "esp32-C"
+        },
+        "02": {
+          "channel": 2,
+          "device": "esp32-C"
+        },
+        "03": {
+          "channel": 3,
+          "device": "esp32-C"
+        },
+        "04": {
+          "channel": 4,
+          "device": "esp32-C"
+        },
+        "05": {
+          "channel": 5,
+          "device": "esp32-C"
+        },
+        "06": {
+          "channel": 6,
+          "device": "esp32-C"
+        },
+        "07": {
+          "channel": 7,
+          "device": "esp32-C"
+        },
+        "08": {
+          "channel": 8,
+          "device": "esp32-C"
+        },
+        "09": {
+          "channel": 9,
+          "device": "esp32-C"
+        }
+      },
+      "total_spots": 10
+    }
+  },
+  "spots": {
+    "A": {
+      "10": {
+        "occupied": false,
+        "source": "esp32-A",
+        "updated_at": 1756992700600
+      },
+      "01": {
+        "occupied": false,
+        "source": "esp32-A",
+        "updated_at": 1756992700600
+      },
+      "02": {
+        "occupied": true,
+        "source": "esp32-A",
+        "updated_at": 1756992700600
+      },
+      "03": {
+        "occupied": false,
+        "source": "esp32-A",
+        "updated_at": 1756992700600
+      },
+      "04": {
+        "occupied": true,
+        "source": "esp32-A",
+        "updated_at": 1756992700600
+      },
+      "05": {
+        "occupied": false,
+        "source": "esp32-A",
+        "updated_at": 1756992700600
+      },
+      "06": {
+        "occupied": false,
+        "source": "esp32-A",
+        "updated_at": 1756992700600
+      },
+      "07": {
+        "occupied": true,
+        "source": "esp32-A",
+        "updated_at": 1756992700600
+      },
+      "08": {
+        "occupied": true,
+        "source": "esp32-A",
+        "updated_at": 1756992700600
+      },
+      "09": {
+        "occupied": false,
+        "source": "esp32-A",
+        "updated_at": 1756992700600
+      }
+    },
+    "B": {
+      "10": {
+        "occupied": false,
+        "source": "esp32-B",
+        "updated_at": 1756992700600
+      },
+      "01": {
+        "occupied": true,
+        "source": "esp32-B",
+        "updated_at": 1756992700600
+      },
+      "02": {
+        "occupied": true,
+        "source": "esp32-B",
+        "updated_at": 1756992700600
+      },
+      "03": {
+        "occupied": true,
+        "source": "esp32-B",
+        "updated_at": 1756992700600
+      },
+      "04": {
+        "occupied": true,
+        "source": "esp32-B",
+        "updated_at": 1756992700600
+      },
+      "05": {
+        "occupied": true,
+        "source": "esp32-B",
+        "updated_at": 1756992700600
+      },
+      "06": {
+        "occupied": true,
+        "source": "esp32-B",
+        "updated_at": 1756992700600
+      },
+      "07": {
+        "occupied": true,
+        "source": "esp32-B",
+        "updated_at": 1756992700600
+      },
+      "08": {
+        "occupied": true,
+        "source": "esp32-B",
+        "updated_at": 1756992700600
+      },
+      "09": {
+        "occupied": false,
+        "source": "esp32-B",
+        "updated_at": 1756992700600
+      }
+    },
+    "C": {
+      "10": {
+        "occupied": true,
+        "source": "esp32-C",
+        "updated_at": 1756992700600
+      },
+      "01": {
+        "occupied": true,
+        "source": "esp32-C",
+        "updated_at": 1756992700600
+      },
+      "02": {
+        "occupied": true,
+        "source": "esp32-C",
+        "updated_at": 1756992700600
+      },
+      "03": {
+        "occupied": true,
+        "source": "esp32-C",
+        "updated_at": 1756992700600
+      },
+      "04": {
+        "occupied": true,
+        "source": "esp32-C",
+        "updated_at": 1756992700600
+      },
+      "05": {
+        "occupied": true,
+        "source": "esp32-C",
+        "updated_at": 1756992700600
+      },
+      "06": {
+        "occupied": true,
+        "source": "esp32-C",
+        "updated_at": 1756992700600
+      },
+      "07": {
+        "occupied": true,
+        "source": "esp32-C",
+        "updated_at": 1756992700600
+      },
+      "08": {
+        "occupied": true,
+        "source": "esp32-C",
+        "updated_at": 1756992700600
+      },
+      "09": {
+        "occupied": true,
+        "source": "esp32-C",
+        "updated_at": 1756992700600
+      }
+    }
+  }
+}

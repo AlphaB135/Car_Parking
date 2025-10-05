@@ -34,11 +34,7 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
     'C': 'หน้าศูนย์กีฬา',
   };
 
-  final Map<String, int> _fallbackTotals = const {
-    'A': 10,
-    'B': 10,
-    'C': 10,
-  };
+  final Map<String, int> _fallbackTotals = const {'A': 10, 'B': 10, 'C': 10};
 
   LatLng? _userPosition;
   bool _requestingLocation = false;
@@ -49,9 +45,11 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
     }
     final values = _lotCoordinates.values.toList();
     final avgLat =
-        values.map((point) => point.latitude).reduce((a, b) => a + b) / values.length;
+        values.map((point) => point.latitude).reduce((a, b) => a + b) /
+        values.length;
     final avgLng =
-        values.map((point) => point.longitude).reduce((a, b) => a + b) / values.length;
+        values.map((point) => point.longitude).reduce((a, b) => a + b) /
+        values.length;
     return LatLng(avgLat, avgLng);
   }
 
@@ -76,11 +74,14 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
                 options: MapOptions(
                   initialCenter: _initialCenter,
                   initialZoom: 17,
-                  interactionOptions: const InteractionOptions(flags: InteractiveFlag.all),
+                  interactionOptions: const InteractionOptions(
+                    flags: InteractiveFlag.all,
+                  ),
                 ),
                 children: [
                   TileLayer(
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.example.my_app',
                   ),
                   MarkerLayer(markers: markers),
@@ -91,11 +92,7 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
                   ),
                 ],
               ),
-              Positioned(
-                right: 16,
-                bottom: 16,
-                child: _buildLegend(overview),
-              ),
+              Positioned(right: 16, bottom: 16, child: _buildLegend(overview)),
             ],
           );
         },
@@ -174,9 +171,9 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
 
   void _showMessage(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   List<Marker> _buildMarkers(Map<String, dynamic> overview) {
@@ -186,8 +183,12 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
       final lotData = _composeLotData(lotId, overview);
       final total = lotData.total;
       final available = lotData.available;
-      final markerColor = available > 0 ? const Color(0xFF22C55E) : const Color(0xFFEF4444);
-      final label = total > 0 ? '${lotData.name}\nว่าง $available/$total' : lotData.name;
+      final markerColor = available > 0
+          ? const Color(0xFF22C55E)
+          : const Color(0xFFEF4444);
+      final label = total > 0
+          ? '${lotData.name}\nว่าง $available/$total'
+          : lotData.name;
 
       markers.add(
         Marker(
@@ -201,7 +202,10 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
               children: [
                 Icon(Icons.location_on, color: markerColor, size: 36),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
@@ -215,7 +219,10 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
                   child: Text(
                     label,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -274,7 +281,10 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
                 children: [
                   Text(
                     lotData.name,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -290,7 +300,10 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
                   Expanded(
                     child: Text(
                       lotData.location,
-                      style: const TextStyle(fontSize: 14, color: Colors.black87),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
                 ],
@@ -302,7 +315,11 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
                   const SizedBox(width: 12),
                   _buildInfoChip('ว่าง', '$available', const Color(0xFF059669)),
                   const SizedBox(width: 12),
-                  _buildInfoChip('ไม่ว่าง', '$occupied', const Color(0xFFDC2626)),
+                  _buildInfoChip(
+                    'ไม่ว่าง',
+                    '$occupied',
+                    const Color(0xFFDC2626),
+                  ),
                 ],
               ),
               if (lotData.updatedAtLabel != null) ...[
@@ -316,7 +333,8 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton.icon(
-                  onPressed: () => Navigator.pushReplacementNamed(context, lotData.route),
+                  onPressed: () =>
+                      Navigator.pushReplacementNamed(context, lotData.route),
                   icon: const Icon(Icons.directions_car, size: 18),
                   label: const Text('ดูรายละเอียด'),
                 ),
@@ -329,7 +347,9 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
   }
 
   Widget _buildLegend(Map<String, dynamic> overview) {
-    final lots = _lotCoordinates.keys.map((id) => _composeLotData(id, overview));
+    final lots = _lotCoordinates.keys.map(
+      (id) => _composeLotData(id, overview),
+    );
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -390,10 +410,16 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
         : <String, dynamic>{};
 
     final name =
-        (raw['name'] ?? meta['name'] ?? _fallbackNames[lotId] ?? 'ลาน $lotId').toString();
-    final location = (raw['location'] ?? meta['location'] ??
-            _fallbackLocations[lotId] ?? '-').toString();
-    final route = (raw['route'] ?? meta['route'] ?? '/parking$lotId').toString();
+        (raw['name'] ?? meta['name'] ?? _fallbackNames[lotId] ?? 'ลาน $lotId')
+            .toString();
+    final location =
+        (raw['location'] ??
+                meta['location'] ??
+                _fallbackLocations[lotId] ??
+                '-')
+            .toString();
+    final route = (raw['route'] ?? meta['route'] ?? '/parking$lotId')
+        .toString();
 
     final totalFromMeta = _asInt(
       raw['total_spots'] ?? meta['total_spots'],
@@ -403,7 +429,10 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
         ? (meta['sensors_map'] as Map).length
         : 0;
     // prefer summaries computed from `current` root
-    final availableRaw = _asInt(summary['available'], sensorsCount != 0 ? sensorsCount : _fallbackTotals[lotId] ?? 0);
+    final availableRaw = _asInt(
+      summary['available'],
+      sensorsCount != 0 ? sensorsCount : _fallbackTotals[lotId] ?? 0,
+    );
     final occupiedRaw = _asInt(summary['occupied'], 0);
 
     final provisionalTotal = totalFromMeta != 0

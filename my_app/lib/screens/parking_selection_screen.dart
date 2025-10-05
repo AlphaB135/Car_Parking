@@ -68,57 +68,55 @@ class ParkingSelectionScreen extends StatelessWidget {
   List<Map<String, dynamic>> _buildLotViewModels(
     Map<String, dynamic> overview,
   ) {
-    final items =
-        overview.entries.map((entry) {
-            final raw = entry.value is Map
-                ? Map<String, dynamic>.from(entry.value as Map)
-                : <String, dynamic>{};
-            final meta = raw['metadata'] is Map
-                ? Map<String, dynamic>.from(raw['metadata'] as Map)
-                : <String, dynamic>{};
-            final summary = raw['summary'] is Map
-                ? Map<String, dynamic>.from(raw['summary'] as Map)
-                : <String, dynamic>{};
+    final items = overview.entries.map(
+      (entry) {
+        final raw = entry.value is Map
+            ? Map<String, dynamic>.from(entry.value as Map)
+            : <String, dynamic>{};
+        final meta = raw['metadata'] is Map
+            ? Map<String, dynamic>.from(raw['metadata'] as Map)
+            : <String, dynamic>{};
+        final summary = raw['summary'] is Map
+            ? Map<String, dynamic>.from(raw['summary'] as Map)
+            : <String, dynamic>{};
 
-            final id = entry.key.toString();
-            final title = (raw['name'] ?? meta['name'] ?? 'ลาน $id')
-                .toString();
-            final location = (raw['location'] ?? meta['location'] ?? '')
-                .toString();
+        final id = entry.key.toString();
+        final title = (raw['name'] ?? meta['name'] ?? 'ลาน $id').toString();
+        final location = (raw['location'] ?? meta['location'] ?? '').toString();
 
-            final totalFromMeta = _asInt(
-              raw['total_spots'] ?? meta['total_spots'],
-              0,
-            );
-            final sensorsCount = meta['sensors_map'] is Map
-                ? (meta['sensors_map'] as Map).length
-                : 0;
-            // summaries provided by Rtdb are computed from `current` so prefer them
-            final available = _asInt(summary['available'], sensorsCount);
-            final occupied = _asInt(summary['occupied'], 0);
+        final totalFromMeta = _asInt(
+          raw['total_spots'] ?? meta['total_spots'],
+          0,
+        );
+        final sensorsCount = meta['sensors_map'] is Map
+            ? (meta['sensors_map'] as Map).length
+            : 0;
+        // summaries provided by Rtdb are computed from `current` so prefer them
+        final available = _asInt(summary['available'], sensorsCount);
+        final occupied = _asInt(summary['occupied'], 0);
 
-            final provisionalTotal = totalFromMeta != 0
-                ? totalFromMeta
-                : (sensorsCount != 0 ? sensorsCount : available + occupied);
+        final provisionalTotal = totalFromMeta != 0
+            ? totalFromMeta
+            : (sensorsCount != 0 ? sensorsCount : available + occupied);
 
-            final total = provisionalTotal < 0 ? 0 : provisionalTotal;
-            final safeAvailable = available < 0
-                ? 0
-                : (available > total ? total : available);
-            final computedOccupied = total - safeAvailable;
+        final total = provisionalTotal < 0 ? 0 : provisionalTotal;
+        final safeAvailable = available < 0
+            ? 0
+            : (available > total ? total : available);
+        final computedOccupied = total - safeAvailable;
 
-            return {
-              'id': id,
-              'title': title,
-              'location': location,
-              'route': raw['route'] ?? '/parking$id',
-              'available': safeAvailable,
-              'total': total,
-              'occupied': computedOccupied,
-              'updated_at': raw['updated_at'] ?? summary['updated_at'],
-            };
-          }).toList()
-          ..sort((a, b) => (a['id'] as String).compareTo(b['id'] as String));
+        return {
+          'id': id,
+          'title': title,
+          'location': location,
+          'route': raw['route'] ?? '/parking$id',
+          'available': safeAvailable,
+          'total': total,
+          'occupied': computedOccupied,
+          'updated_at': raw['updated_at'] ?? summary['updated_at'],
+        };
+      },
+    ).toList()..sort((a, b) => (a['id'] as String).compareTo(b['id'] as String));
     return items;
   }
 
@@ -392,9 +390,7 @@ class ParkingSelectionScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      isFull
-                                          ? 'เต็ม'
-                                          : 'ว่าง $available ช่อง',
+                                      isFull ? 'เต็ม' : 'ว่าง $available ช่อง',
                                       style: TextStyle(
                                         color: isFull
                                             ? const Color(0xFFB00020)

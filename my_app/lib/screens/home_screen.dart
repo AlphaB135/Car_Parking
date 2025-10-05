@@ -197,17 +197,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final id = entry.key.toString();
       final name = (map['name'] ?? meta['name'] ?? 'ลานจอด $id').toString();
-      final location =
-          (map['location'] ?? meta['location'] ?? '').toString();
+      final location = (map['location'] ?? meta['location'] ?? '').toString();
 
-      final totalFromMeta =
-          _asInt(map['total_spots'] ?? meta['total_spots'], 0);
+      final totalFromMeta = _asInt(
+        map['total_spots'] ?? meta['total_spots'],
+        0,
+      );
       final sensorsCount = meta['sensors_map'] is Map
           ? (meta['sensors_map'] as Map).length
           : 0;
-    // Use summaries produced by Rtdb (computed from `current`) when available
-    final occupied = _asInt(summary['occupied'], 0);
-    final available = _asInt(summary['available'], 0);
+      // Use summaries produced by Rtdb (computed from `current`) when available
+      final occupied = _asInt(summary['occupied'], 0);
+      final available = _asInt(summary['available'], 0);
 
       final provisionalTotal = totalFromMeta != 0
           ? totalFromMeta
@@ -218,8 +219,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ? 0
           : (available > total ? total : available);
       final computedOccupied = total - safeAvailable;
-      final updatedAtRaw =
-          _asInt(map['updated_at'] ?? summary['updated_at'], 0);
+      final updatedAtRaw = _asInt(
+        map['updated_at'] ?? summary['updated_at'],
+        0,
+      );
       final updatedAt = updatedAtRaw == 0 ? null : updatedAtRaw;
       final route = (map['route'] ?? '/parking$id').toString();
 
@@ -233,8 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
         updatedAt: updatedAt,
         routeName: route,
       );
-    }).toList()
-      ..sort((a, b) => a.id.compareTo(b.id));
+    }).toList()..sort((a, b) => a.id.compareTo(b.id));
 
     setState(() {
       _lots = updated;
@@ -412,8 +414,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         Column(
                           children: _lots.map((lot) {
                             final isFull = lot.available <= 0;
-                            final statusColor =
-                                isFull ? Colors.red : Colors.green;
+                            final statusColor = isFull
+                                ? Colors.red
+                                : Colors.green;
                             final capacityLabel =
                                 'ว่าง ${lot.available}/${lot.capacity}';
                             return Padding(
@@ -514,9 +517,9 @@ class _HomeScreenState extends State<HomeScreen> {
       try {
         await FakeSeeder.seedFromAsset('assets/parking_schema_minimal.json');
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('รีเฟรชข้อมูลจำลองแล้ว')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('รีเฟรชข้อมูลจำลองแล้ว')));
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -536,11 +539,12 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Firebase seed failed: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Firebase seed failed: $e')));
     }
   }
+
   Widget _buildParkingLotItem({
     required String lotId,
     required String title,
@@ -551,8 +555,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required VoidCallback onTap,
     int? updatedAt,
   }) {
-    final lastUpdated =
-        updatedAt != null ? _formatUpdatedAt(updatedAt) : null;
+    final lastUpdated = updatedAt != null ? _formatUpdatedAt(updatedAt) : null;
 
     return GestureDetector(
       onTap: onTap,
@@ -595,8 +598,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(width: 8),
                       Text(
                         capacity,
-                        style:
-                            TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -626,8 +628,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 4),
                     Text(
                       'อัปเดตล่าสุด $lastUpdated',
-                      style:
-                          TextStyle(fontSize: 11, color: Colors.grey[500]),
+                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
                     ),
                   ],
                   const SizedBox(height: 8),

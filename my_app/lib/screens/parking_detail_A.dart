@@ -342,13 +342,15 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
     // If keys are missing, fall back to 1..10
     final items = List<Widget>.generate(10, (i) {
       final key = (i + 1).toString().padLeft(2, '0');
-    final entry = map.containsKey(key)
-      ? map[key]!
-      : <String, dynamic>{'occupied': false};
-    final occupied = Rtdb.normalizeOccupied(entry['occupied']);
-    // debug: show raw value and runtimeType
-    // ignore: avoid_print
-    print('A spot $key raw=${entry['occupied']} type=${entry['occupied']?.runtimeType} -> $occupied');
+      final entry = map.containsKey(key)
+          ? map[key]!
+          : <String, dynamic>{'occupied': false};
+      final occupied = Rtdb.normalizeOccupied(entry['occupied']);
+      // debug: show raw value and runtimeType
+      // ignore: avoid_print
+      print(
+        'A spot $key raw=${entry['occupied']} type=${entry['occupied']?.runtimeType} -> $occupied',
+      );
       final spotId = key;
       return GestureDetector(
         onTap: () async {

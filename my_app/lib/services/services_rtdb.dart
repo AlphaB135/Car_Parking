@@ -50,24 +50,22 @@ class Rtdb {
   /// Stream of all lot summaries computed from `current` root.
   Stream<Map<String, dynamic>> allLotSummaries() {
     if (_fb != null) {
-      return fb.FirebaseDatabase.instance
-          .ref()
-          .child('current')
-          .onValue
-          .map((e) {
-            final raw = (e.snapshot.value as Map?) ?? {};
-            final out = <String, dynamic>{};
-            (raw as Map).forEach((lotId, lotMap) {
-              final counts = computeLotCountsFromMap(lotMap as Map?);
-              out['$lotId'] = {
-                'available': counts.free,
-                'occupied': counts.occupied,
-                'total_spots': counts.total,
-                'updated_at': DateTime.now().millisecondsSinceEpoch,
-              };
-            });
-            return out;
-          });
+      return fb.FirebaseDatabase.instance.ref().child('current').onValue.map((
+        e,
+      ) {
+        final raw = (e.snapshot.value as Map?) ?? {};
+        final out = <String, dynamic>{};
+        (raw as Map).forEach((lotId, lotMap) {
+          final counts = computeLotCountsFromMap(lotMap as Map?);
+          out['$lotId'] = {
+            'available': counts.free,
+            'occupied': counts.occupied,
+            'total_spots': counts.total,
+            'updated_at': DateTime.now().millisecondsSinceEpoch,
+          };
+        });
+        return out;
+      });
     }
     final FakeDatabaseReference fakeRef = _fake!;
     return fakeRef.child('current').onValue.map((e) {
@@ -314,14 +312,15 @@ class Rtdb {
         final isOcc = normalizeOccupied(v['occupied']);
         // temporary debug print to aid diagnosis
         // ignore: avoid_print
-        print('spot $k occupied=${v['occupied']} (${v['occupied']?.runtimeType}) -> $isOcc');
+        print(
+          'spot $k occupied=${v['occupied']} (${v['occupied']?.runtimeType}) -> $isOcc',
+        );
         occ += isOcc ? 1 : 0;
         total++;
       }
     });
     return LotCounts(total, occ, total - occ);
   }
-
 }
 
 /// Simple value object for lot counts.

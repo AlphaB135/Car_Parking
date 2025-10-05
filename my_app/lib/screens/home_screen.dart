@@ -379,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // เธฅเธฒเธเธเธญเธ”เธฃเธ– (live summaries)
+                // รายการลานจอดพร้อมข้อมูลสด (Realtime/Fake DB)
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(

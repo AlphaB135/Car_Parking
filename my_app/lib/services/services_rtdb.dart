@@ -63,16 +63,37 @@ class Rtdb {
         .map((e) => _spotsMapToList(_castMap(e.snapshotValue)));
   }
 
+  /// Stream the raw spots map for a lot as { "01": {...}, "02": {...} }
+  Stream<Map<String, Map<String, dynamic>>> lotSpotsMap(String lotId) {
+    if (_fb != null) {
+      return fb.FirebaseDatabase.instance
+          .ref()
+          .child('spots/$lotId')
+          .onValue
+          .map((e) {
+            final raw = (e.snapshot.value as Map?) ?? {};
+            return raw.map(
+              (k, v) => MapEntry('$k', Map<String, dynamic>.from(v)),
+            );
+          });
+    }
+    final FakeDatabaseReference fakeRef = _fake!;
+    return fakeRef.child('spots/$lotId').onValue.map((e) {
+      final raw = (e.snapshotValue as Map?) ?? {};
+      return raw.map((k, v) => MapEntry('$k', Map<String, dynamic>.from(v)));
+    });
+  }
+
   /// Stream of metadata for a single lot (name, location, total_spots, etc.)
   Stream<Map<String, dynamic>> lotMetadata(String lotId) {
     if (_fb != null) {
-      final fbRef = _fb!;
-      return fbRef
+      return fb.FirebaseDatabase.instance
+          .ref()
           .child('lots/$lotId')
           .onValue
           .map((e) => _castMap(e.snapshot.value));
     }
-    final fakeRef = _fake!;
+    final FakeDatabaseReference fakeRef = _fake!;
     return fakeRef
         .child('lots/$lotId')
         .onValue
@@ -82,10 +103,13 @@ class Rtdb {
   /// Stream of metadata for all lots keyed by lot id.
   Stream<Map<String, dynamic>> allLotsMetadata() {
     if (_fb != null) {
-      final fbRef = _fb!;
-      return fbRef.child('lots').onValue.map((e) => _castMap(e.snapshot.value));
+      return fb.FirebaseDatabase.instance
+          .ref()
+          .child('lots')
+          .onValue
+          .map((e) => _castMap(e.snapshot.value));
     }
-    final fakeRef = _fake!;
+    final FakeDatabaseReference fakeRef = _fake!;
     return fakeRef.child('lots').onValue.map((e) => _castMap(e.snapshotValue));
   }
 
@@ -107,11 +131,11 @@ class Rtdb {
       for (final id in ids) {
         final metaRaw = latestLots[id];
         final meta = metaRaw is Map
-            ? Map<String, dynamic>.from(metaRaw as Map)
+            ? Map<String, dynamic>.from(metaRaw)
             : <String, dynamic>{};
         final summaryRaw = latestSummaries[id];
         final summary = summaryRaw is Map
-            ? Map<String, dynamic>.from(summaryRaw as Map)
+            ? Map<String, dynamic>.from(summaryRaw)
             : <String, dynamic>{};
         final combined = <String, dynamic>{
           'id': id,
@@ -161,7 +185,7 @@ class Rtdb {
   /// Convenience helper for widgets that only need the metadata once.
   Future<Map<String, dynamic>> fetchLotsOnce() async {
     if (_fb != null) {
-      final snap = await _fb!.child('lots').get();
+      final snap = await fb.FirebaseDatabase.instance.ref().child('lots').get();
       return _castMap(snap.value);
     }
     final snap = await _fake!.child('lots').get();
@@ -176,8 +200,7 @@ class Rtdb {
   ) async {
     final path = 'spots/$lotId/$spotId/occupied';
     if (_fb != null) {
-      final fbRef = _fb;
-      await fbRef.child(path).set(occupied);
+      await fb.FirebaseDatabase.instance.ref().child(path).set(occupied);
     } else {
       final fakeRef = _fake!;
       await fakeRef.child(path).set(occupied);
@@ -195,9 +218,15 @@ class Rtdb {
   Future<void> toggleSpot(String lotId, String spotId) async {
     // read current value
     if (_fb != null) {
-      final snap = await _fb.child('spots/$lotId/$spotId/occupied').get();
+      final snap = await fb.FirebaseDatabase.instance
+          .ref()
+          .child('spots/$lotId/$spotId/occupied')
+          .get();
       final cur = snap.value as bool? ?? false;
-      await _fb.child('spots/$lotId/$spotId/occupied').set(!cur);
+      await fb.FirebaseDatabase.instance
+          .ref()
+          .child('spots/$lotId/$spotId/occupied')
+          .set(!cur);
     } else {
       final fake = _fake!;
       final cur =

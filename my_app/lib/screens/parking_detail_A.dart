@@ -12,7 +12,6 @@ class ParkingDetailAScreen extends StatefulWidget {
 }
 
 class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
-  final int _currentIndex = 1;
   final String lotId = 'A';
 
   // Local mock fallback (10 spots)
@@ -65,10 +64,7 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
         raw['available'] ?? summary['available'],
         sensorsCount - _occupiedLive,
       );
-      final occupied = _asInt(
-        raw['occupied'] ?? summary['occupied'],
-        total - available,
-      );
+      // occupied computed from total/available when present
       final updatedAt = summary['updated_at'] ?? raw['updated_at'];
 
       if (!mounted) return;
@@ -213,7 +209,10 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
                         const SizedBox(width: 4),
                         Text(
                           _lotLocation,
-                          style: const TextStyle(fontSize: 14, color: Colors.black54),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black54,
+                          ),
                         ),
                       ],
                     ),
@@ -234,48 +233,7 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.info,
-                            color: Colors.grey[600],
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'ข้อมูลเพิ่มเติม',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _lotDescription,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                    // 'ข้อมูลเพิ่มเติม' section removed per request
                   ],
                 ),
               ),
@@ -283,24 +241,24 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
 
               // Spots grid: live when firebaseEnabled, otherwise local mock
               firebaseEnabled
-                  ? StreamBuilder<List<bool>>(
-                      stream: Rtdb().lotSpots(lotId),
+                  ? StreamBuilder<Map<String, Map<String, dynamic>>>(
+                      stream: Rtdb().lotSpotsMap(lotId),
                       builder: (context, snapshot) {
-                        final list =
-                            snapshot.data ?? List<bool>.filled(10, false);
+                        final map =
+                            snapshot.data ?? <String, Map<String, dynamic>>{};
                         // show loader while waiting for first data
                         if (snapshot.connectionState ==
                                 ConnectionState.waiting &&
-                            list.isEmpty) {
+                            map.isEmpty) {
                           return const Padding(
                             padding: EdgeInsets.all(24),
                             child: Center(child: CircularProgressIndicator()),
                           );
                         }
-                        return _buildSpotsWrapFromList(context, list);
+                        return _buildSpotsGridFromMap(context, map);
                       },
                     )
-                  : _buildSpotsWrapFromMock(),
+                  : _buildSpotsGridFromMock(),
             ],
           ),
         ),
@@ -353,36 +311,46 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
     );
   }
 
-  Widget _buildSpotsWrapFromMock() {
-    final items = List<Widget>.generate(10, (i) {
+  Widget _buildSpotsGridFromMock() {
+    Widget spot(int i) {
       final occupied = parkingSpots[i];
       return GestureDetector(
-        onTap: () {
-          setState(() => parkingSpots[i] = !parkingSpots[i]);
-        },
+        onTap: () => setState(() => parkingSpots[i] = !parkingSpots[i]),
         child: Padding(
           padding: const EdgeInsets.all(6),
           child: _buildRealisticParkingSpot(i + 1, occupied, isTopRow: i < 5),
         ),
       );
-    });
+    }
 
-    return Wrap(children: items);
+    final firstRow = Row(children: List<Widget>.generate(5, (i) => spot(i)));
+    final secondRow = Row(
+      children: List<Widget>.generate(5, (i) => spot(i + 5)),
+    );
+    return Column(children: [firstRow, const SizedBox(height: 8), secondRow]);
   }
 
   // ...existing code...
 
-  Widget _buildSpotsWrapFromList(BuildContext context, List<bool> list) {
+  // kept for compatibility; spot rendering now uses grid builders when live
+
+  Widget _buildSpotsGridFromMap(
+    BuildContext context,
+    Map<String, Map<String, dynamic>> map,
+  ) {
+    // Expect keys like '01'..'10'. We will index by numeric key.
+    // If keys are missing, fall back to 1..10
     final items = List<Widget>.generate(10, (i) {
-      final occupied = (i < list.length) ? list[i] : false;
-      final spotId = (i + 1).toString().padLeft(2, '0');
+      final key = (i + 1).toString().padLeft(2, '0');
+      final entry = map.containsKey(key)
+          ? map[key]!
+          : <String, dynamic>{'occupied': false};
+      final occupied = (entry['occupied'] as bool?) ?? false;
+      final spotId = key;
       return GestureDetector(
         onTap: () async {
           if (!firebaseEnabled) {
-            // local toggle
-            setState(() {
-              parkingSpots[i] = !parkingSpots[i];
-            });
+            setState(() {});
             return;
           }
           try {
@@ -390,7 +358,9 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
           } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('อัปเดตสถานะช่องจอดไม่สำเร็จ'),
+                content: Text(
+                  '\u0e2d\u0e31\u0e1b\u0e40\u0e14\u0e15\u0e2a\u0e16\u0e32\u0e19\u0e30\u0e0a\u0e48\u0e2d\u0e07\u0e08\u0e2d\u0e14\u0e44\u0e21\u0e48\u0e2a\u0e33',
+                ),
               ),
             );
           }
@@ -401,8 +371,14 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
         ),
       );
     });
-
-    return Wrap(children: items);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(children: items.sublist(0, 5)),
+        const SizedBox(height: 8),
+        Row(children: items.sublist(5)),
+      ],
+    );
   }
 
   Widget _buildRealisticParkingSpot(

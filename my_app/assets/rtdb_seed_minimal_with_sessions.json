@@ -1,15 +1,210 @@
 {
+  "_meta": {
+    "generated_at_ms": 1759665972955,
+    "notes": "Lots have Thai names/locations. Each lot has 5/10 occupied to show half available.",
+    "version": "rtdb-demo-half-free"
+  },
   "current": {
     "A": {
-      "01": { "occupied": false, "since": 0, "device": "esp32-A" },
-      "02": { "occupied": false, "since": 0, "device": "esp32-A" }
+      "10": {
+        "device": "esp32-A",
+        "occupied": false,
+        "since": 1759665972955
+      },
+      "01": {
+        "device": "esp32-A",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "02": {
+        "device": "esp32-A",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "03": {
+        "device": "esp32-A",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "04": {
+        "device": "esp32-A",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "05": {
+        "device": "esp32-A",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "06": {
+        "device": "esp32-A",
+        "occupied": false,
+        "since": 1759665972955
+      },
+      "07": {
+        "device": "esp32-A",
+        "occupied": false,
+        "since": 1759665972955
+      },
+      "08": {
+        "device": "esp32-A",
+        "occupied": false,
+        "since": 1759665972955
+      },
+      "09": {
+        "device": "esp32-A",
+        "occupied": false,
+        "since": 1759665972955
+      }
+    },
+    "B": {
+      "10": {
+        "device": "esp32-B",
+        "occupied": false,
+        "since": 1759665972955
+      },
+      "01": {
+        "device": "esp32-B",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "02": {
+        "device": "esp32-B",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "03": {
+        "device": "esp32-B",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "04": {
+        "device": "esp32-B",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "05": {
+        "device": "esp32-B",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "06": {
+        "device": "esp32-B",
+        "occupied": false,
+        "since": 1759665972955
+      },
+      "07": {
+        "device": "esp32-B",
+        "occupied": false,
+        "since": 1759665972955
+      },
+      "08": {
+        "device": "esp32-B",
+        "occupied": false,
+        "since": 1759665972955
+      },
+      "09": {
+        "device": "esp32-B",
+        "occupied": false,
+        "since": 1759665972955
+      }
+    },
+    "C": {
+      "10": {
+        "device": "esp32-C",
+        "occupied": false,
+        "since": 1759665972955
+      },
+      "01": {
+        "device": "esp32-C",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "02": {
+        "device": "esp32-C",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "03": {
+        "device": "esp32-C",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "04": {
+        "device": "esp32-C",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "05": {
+        "device": "esp32-C",
+        "occupied": true,
+        "since": 1759665972955
+      },
+      "06": {
+        "device": "esp32-C",
+        "occupied": false,
+        "since": 1759665972955
+      },
+      "07": {
+        "device": "esp32-C",
+        "occupied": false,
+        "since": 1759665972955
+      },
+      "08": {
+        "device": "esp32-C",
+        "occupied": false,
+        "since": 1759665972955
+      },
+      "09": {
+        "device": "esp32-C",
+        "occupied": false,
+        "since": 1759665972955
+      }
     }
   },
   "devices": {
-    "esp32-A": { "lot": "A", "status": "offline", "last_seen": 0 }
+    "esp32-A": {
+      "last_seen": 1759665972955,
+      "lot": "A",
+      "status": "online"
+    },
+    "esp32-B": {
+      "last_seen": 1759665972955,
+      "lot": "B",
+      "status": "online"
+    },
+    "esp32-C": {
+      "last_seen": 1759665972955,
+      "lot": "C",
+      "status": "online"
+    }
   },
   "lots": {
-    "A": { "name": "Lot A", "location": "", "total_spots": 2 }
+    "A": {
+      "location": "หน้าอาคารเรียนรวม",
+      "name": "ลาน A",
+      "total_spots": 10
+    },
+    "B": {
+      "location": "ข้างโรงยิม",
+      "name": "ลาน B",
+      "total_spots": 10
+    },
+    "C": {
+      "location": "หน้าห้องสมุด",
+      "name": "ลาน C",
+      "total_spots": 10
+    }
   },
-  "_meta": { "version": "seed" }
+  "spots": {
+    "A": {
+      "02": {
+        "occupied": false
+      }
+    }
+  },
+  "test_connection": {
+    "status": "ok",
+    "ts": 1759666330702
+  }
 }

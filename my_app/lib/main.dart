@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'dart:io' show File, Directory, Platform;
 
 // screens
 import 'screens/home_screen.dart';
@@ -15,6 +16,52 @@ import 'services/services_seed_fake.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Quick developer switch: create an empty file named `USE_FAKE_DB` in the
+  // project root (same folder as pubspec.yaml) to force the app to use the
+  // local FakeDatabase seeded from assets instead of initializing Firebase.
+  // Only check the filesystem when NOT running on web to avoid unsupported
+  // dart:io operations in web builds.
+  // Also support a compile-time switch so you can run on web without touching files.
+  // Example: flutter run -d chrome --dart-define=USE_FAKE_DB=true
+  const useFakeEnv = bool.fromEnvironment('USE_FAKE_DB', defaultValue: false);
+
+  var useFake = useFakeEnv;
+  try {
+    if (!kIsWeb && !useFake) {
+      useFake = File(
+        '${Directory.current.path}${Platform.pathSeparator}USE_FAKE_DB',
+      ).existsSync();
+    }
+  } catch (e) {
+    useFake = useFakeEnv;
+  }
+
+  if (useFake) {
+    // Force fake mode and seed from bundled asset(s). Prefer the user's
+    // `assets/rtdb_seed_minimal_with_sessions.json` if present, otherwise
+    // fall back to `assets/parking_schema_minimal.json`.
+    firebaseEnabled = false;
+    try {
+      // Try the user-provided seed first
+      await FakeSeeder.seedFromAsset(
+        'assets/rtdb_seed_minimal_with_sessions.json',
+      );
+      print(
+        '[FakeSeeder] seeded from assets/rtdb_seed_minimal_with_sessions.json (USE_FAKE_DB)',
+      );
+    } catch (_) {
+      try {
+        await FakeSeeder.seedFromAsset('assets/parking_schema_minimal.json');
+        print(
+          '[FakeSeeder] seeded from assets/parking_schema_minimal.json (USE_FAKE_DB)',
+        );
+      } catch (se) {
+        print('[FakeSeeder] seed failed: $se');
+      }
+    }
+    runApp(ParkingApp());
+    return;
+  }
   try {
     // If you generated `lib/firebase_options.dart` (flutterfire configure)
     // prefer using the generated options. If the values are still the

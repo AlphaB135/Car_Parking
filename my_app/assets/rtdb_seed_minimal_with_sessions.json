@@ -1,0 +1,15 @@
+{
+  "current": {
+    "A": {
+      "01": { "occupied": false, "since": 0, "device": "esp32-A" },
+      "02": { "occupied": false, "since": 0, "device": "esp32-A" }
+    }
+  },
+  "devices": {
+    "esp32-A": { "lot": "A", "status": "offline", "last_seen": 0 }
+  },
+  "lots": {
+    "A": { "name": "Lot A", "location": "", "total_spots": 2 }
+  },
+  "_meta": { "version": "seed" }
+}

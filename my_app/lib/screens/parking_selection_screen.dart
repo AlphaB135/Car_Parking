@@ -93,11 +93,9 @@ class ParkingSelectionScreen extends StatelessWidget {
             final sensorsCount = meta['sensors_map'] is Map
                 ? (meta['sensors_map'] as Map).length
                 : 0;
-            final available = _asInt(
-              raw['available'] ?? summary['available'],
-              sensorsCount,
-            );
-            final occupied = _asInt(raw['occupied'] ?? summary['occupied'], 0);
+            // summaries provided by Rtdb are computed from `current` so prefer them
+            final available = _asInt(summary['available'], sensorsCount);
+            final occupied = _asInt(summary['occupied'], 0);
 
             final provisionalTotal = totalFromMeta != 0
                 ? totalFromMeta

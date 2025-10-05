@@ -205,12 +205,9 @@ class _HomeScreenState extends State<HomeScreen> {
       final sensorsCount = meta['sensors_map'] is Map
           ? (meta['sensors_map'] as Map).length
           : 0;
-      final occupied = _asInt(map['occupied'] ?? summary['occupied'], 0);
-      final availableGuess = sensorsCount != 0
-          ? sensorsCount - occupied
-          : _asInt(summary['available'], 0);
-      final available =
-          _asInt(map['available'] ?? summary['available'], availableGuess);
+    // Use summaries produced by Rtdb (computed from `current`) when available
+    final occupied = _asInt(summary['occupied'], 0);
+    final available = _asInt(summary['available'], 0);
 
       final provisionalTotal = totalFromMeta != 0
           ? totalFromMeta

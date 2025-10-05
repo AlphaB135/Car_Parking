@@ -402,11 +402,9 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
     final sensorsCount = meta['sensors_map'] is Map
         ? (meta['sensors_map'] as Map).length
         : 0;
-    final availableRaw = _asInt(
-      raw['available'] ?? summary['available'],
-      sensorsCount != 0 ? sensorsCount : _fallbackTotals[lotId] ?? 0,
-    );
-    final occupiedRaw = _asInt(raw['occupied'] ?? summary['occupied'], 0);
+    // prefer summaries computed from `current` root
+    final availableRaw = _asInt(summary['available'], sensorsCount != 0 ? sensorsCount : _fallbackTotals[lotId] ?? 0);
+    final occupiedRaw = _asInt(summary['occupied'], 0);
 
     final provisionalTotal = totalFromMeta != 0
         ? totalFromMeta

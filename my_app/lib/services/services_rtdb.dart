@@ -16,59 +16,89 @@ class Rtdb {
       _fake = firebaseEnabled ? null : FakeDatabaseReference('/');
 
   /// Stream of a single lot summary (available, occupied, updated_at)
+  /// NOTE: summaries are now computed from `current/<lotId>` only.
   Stream<Map<String, dynamic>> lotSummary(String lotId) {
     if (_fb != null) {
-      final fbRef = _fb;
-      return fbRef
-          .child('lot_summaries/$lotId')
+      return fb.FirebaseDatabase.instance
+          .ref()
+          .child('current/$lotId')
           .onValue
-          .map((e) => _castMap(e.snapshot.value));
+          .map((e) {
+            final raw = (e.snapshot.value as Map?) ?? {};
+            final counts = computeLotCountsFromMap(raw);
+            return {
+              'available': counts.free,
+              'occupied': counts.occupied,
+              'total_spots': counts.total,
+              'updated_at': DateTime.now().millisecondsSinceEpoch,
+            };
+          });
     }
-    final fakeRef = _fake!;
-    return fakeRef
-        .child('lot_summaries/$lotId')
-        .onValue
-        .map((e) => _castMap(e.snapshotValue));
+    final FakeDatabaseReference fakeRef = _fake!;
+    return fakeRef.child('current/$lotId').onValue.map((e) {
+      final raw = (e.snapshotValue as Map?) ?? {};
+      final counts = computeLotCountsFromMap(raw);
+      return {
+        'available': counts.free,
+        'occupied': counts.occupied,
+        'total_spots': counts.total,
+        'updated_at': DateTime.now().millisecondsSinceEpoch,
+      };
+    });
   }
 
-  /// Stream of all lot summaries as Map<lotId, Map>
+  /// Stream of all lot summaries computed from `current` root.
   Stream<Map<String, dynamic>> allLotSummaries() {
     if (_fb != null) {
-      final fbRef = _fb;
-      return fbRef
-          .child('lot_summaries')
+      return fb.FirebaseDatabase.instance
+          .ref()
+          .child('current')
           .onValue
-          .map((e) => _castMap(e.snapshot.value));
+          .map((e) {
+            final raw = (e.snapshot.value as Map?) ?? {};
+            final out = <String, dynamic>{};
+            (raw as Map).forEach((lotId, lotMap) {
+              final counts = computeLotCountsFromMap(lotMap as Map?);
+              out['$lotId'] = {
+                'available': counts.free,
+                'occupied': counts.occupied,
+                'total_spots': counts.total,
+                'updated_at': DateTime.now().millisecondsSinceEpoch,
+              };
+            });
+            return out;
+          });
     }
-    final fakeRef = _fake!;
-    return fakeRef
-        .child('lot_summaries')
-        .onValue
-        .map((e) => _castMap(e.snapshotValue));
+    final FakeDatabaseReference fakeRef = _fake!;
+    return fakeRef.child('current').onValue.map((e) {
+      final raw = (e.snapshotValue as Map?) ?? {};
+      final out = <String, dynamic>{};
+      (raw as Map).forEach((lotId, lotMap) {
+        final counts = computeLotCountsFromMap(lotMap as Map?);
+        out['$lotId'] = {
+          'available': counts.free,
+          'occupied': counts.occupied,
+          'total_spots': counts.total,
+          'updated_at': DateTime.now().millisecondsSinceEpoch,
+        };
+      });
+      return out;
+    });
   }
 
   /// Stream of spot occupancy for a lot as ordered List<bool> (01..10)
+  /// Now reads from `current/<lotId>` and normalizes occupied values.
   Stream<List<bool>> lotSpots(String lotId) {
-    if (_fb != null) {
-      final fbRef = _fb;
-      return fbRef
-          .child('spots/$lotId')
-          .onValue
-          .map((e) => _spotsMapToList(_castMap(e.snapshot.value)));
-    }
-    final fakeRef = _fake!;
-    return fakeRef
-        .child('spots/$lotId')
-        .onValue
-        .map((e) => _spotsMapToList(_castMap(e.snapshotValue)));
+    return lotSpotsMap(lotId).map((m) => _spotsMapToList(m));
   }
 
-  /// Stream the raw spots map for a lot as { "01": {...}, "02": {...} }
+  /// Stream the raw spot map for a lot as { "01": {...}, "02": {...} }
+  /// Reads from `current/<lotId>` so UI and summaries use the same source.
   Stream<Map<String, Map<String, dynamic>>> lotSpotsMap(String lotId) {
     if (_fb != null) {
       return fb.FirebaseDatabase.instance
           .ref()
-          .child('spots/$lotId')
+          .child('current/$lotId')
           .onValue
           .map((e) {
             final raw = (e.snapshot.value as Map?) ?? {};
@@ -78,7 +108,7 @@ class Rtdb {
           });
     }
     final FakeDatabaseReference fakeRef = _fake!;
-    return fakeRef.child('spots/$lotId').onValue.map((e) {
+    return fakeRef.child('current/$lotId').onValue.map((e) {
       final raw = (e.snapshotValue as Map?) ?? {};
       return raw.map((k, v) => MapEntry('$k', Map<String, dynamic>.from(v)));
     });
@@ -198,14 +228,13 @@ class Rtdb {
     String spotId,
     bool occupied,
   ) async {
-    final path = 'spots/$lotId/$spotId/occupied';
+    final path = 'current/$lotId/$spotId/occupied';
     if (_fb != null) {
       await fb.FirebaseDatabase.instance.ref().child(path).set(occupied);
     } else {
       final fakeRef = _fake!;
       await fakeRef.child(path).set(occupied);
-      // also update lot_summaries for convenience in fake mode
-      await _recomputeLotSummary(lotId);
+      // summaries are computed from `current` live; no local recompute needed
     }
   }
 
@@ -220,20 +249,18 @@ class Rtdb {
     if (_fb != null) {
       final snap = await fb.FirebaseDatabase.instance
           .ref()
-          .child('spots/$lotId/$spotId/occupied')
+          .child('current/$lotId/$spotId/occupied')
           .get();
-      final cur = snap.value as bool? ?? false;
+      final cur = normalizeOccupied(snap.value);
       await fb.FirebaseDatabase.instance
           .ref()
-          .child('spots/$lotId/$spotId/occupied')
+          .child('current/$lotId/$spotId/occupied')
           .set(!cur);
     } else {
       final fake = _fake!;
-      final cur =
-          (await fake.child('spots/$lotId/$spotId/occupied').get()) as bool? ??
-          false;
-      await fake.child('spots/$lotId/$spotId/occupied').set(!cur);
-      await _recomputeLotSummary(lotId);
+      final curRaw = await fake.child('current/$lotId/$spotId/occupied').get();
+      final cur = normalizeOccupied(curRaw);
+      await fake.child('current/$lotId/$spotId/occupied').set(!cur);
     }
   }
 
@@ -244,29 +271,61 @@ class Rtdb {
     return Map<String, dynamic>.from(v as Map);
   }
 
+  /// Normalize various occupied value types into a boolean.
+  /// Accepts bool, num (1/0), or strings like 'true'/'false' (case-insensitive) or '1'/ '0'.
+  static bool normalizeOccupied(dynamic o) {
+    // debug log for runtime type and raw value
+    // (temporary) prints will help track inconsistent types from RTDB
+    // ignore: avoid_print
+    print('normalizeOccupied raw=$o type=${o?.runtimeType}');
+    if (o is bool) return o;
+    if (o is num) return o != 0;
+    if (o is String) {
+      final s = o.toLowerCase().trim();
+      return s == 'true' || s == '1';
+    }
+    return false;
+  }
+
   static List<bool> _spotsMapToList(Map<String, dynamic> m) {
     // Expect keys '01'..'10'
-    final keys = m.keys.toList()..sort((a, b) => int.parse(a) - int.parse(b));
+    final keys = m.keys.toList()
+      ..sort((a, b) {
+        final ai = int.tryParse(a.toString()) ?? 0;
+        final bi = int.tryParse(b.toString()) ?? 0;
+        return ai - bi;
+      });
     return keys
         .map((k) {
           final entry = Map<String, dynamic>.from(m[k] as Map);
-          return (entry['occupied'] as bool?) ?? false;
+          return normalizeOccupied(entry['occupied']);
         })
         .toList(growable: false);
   }
 
-  Future<void> _recomputeLotSummary(String lotId) async {
-    if (_fake == null) return;
-    final snap = await _fake.child('spots/$lotId').get();
-    final m = _castMap(snap);
-    final list = _spotsMapToList(m);
-    final total = list.length;
-    final occupied = list.where((e) => e).length;
-    final available = total - occupied;
-    await _fake.child('lot_summaries/$lotId').set({
-      'available': available,
-      'occupied': occupied,
-      'updated_at': DateTime.now().millisecondsSinceEpoch,
+  /// Compute counts (total, occupied, free) from a raw `current/<lot>` map.
+  /// Only counts keys that look like spot ids (two-digit strings like '01').
+  static LotCounts computeLotCountsFromMap(Map? raw) {
+    final m = raw ?? <dynamic, dynamic>{};
+    int total = 0, occ = 0;
+    m.forEach((k, v) {
+      // accept keys like '01', '02', ..., '10' (two characters, numeric)
+      if (k is String && k.length == 2 && int.tryParse(k) != null && v is Map) {
+        final isOcc = normalizeOccupied(v['occupied']);
+        // temporary debug print to aid diagnosis
+        // ignore: avoid_print
+        print('spot $k occupied=${v['occupied']} (${v['occupied']?.runtimeType}) -> $isOcc');
+        occ += isOcc ? 1 : 0;
+        total++;
+      }
     });
+    return LotCounts(total, occ, total - occ);
   }
+
+}
+
+/// Simple value object for lot counts.
+class LotCounts {
+  final int total, occupied, free;
+  const LotCounts(this.total, this.occupied, this.free);
 }

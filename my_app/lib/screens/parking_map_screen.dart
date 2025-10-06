@@ -57,6 +57,9 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // allow the body to extend behind the bottomNavigationBar so the map
+      // fills the full screen area (removes the visible gap at the bottom)
+      extendBody: true,
       appBar: AppBar(
         title: const Text('แผนที่ลานจอด'),
         backgroundColor: Colors.white,
@@ -70,45 +73,34 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
 
           return Stack(
             children: [
-              // Add bottom padding so marker widgets won't overflow under
-              // the bottom navigation bar or system insets when placed near
-              // the bottom of the map.
-              Builder(
-                builder: (context) {
-                  final bottomNavHeight = kBottomNavigationBarHeight; // 56.0
-                  final safeBottom = MediaQuery.of(context).padding.bottom;
-                  final pad = bottomNavHeight + safeBottom + 16.0;
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: pad),
-                    child: FlutterMap(
-                      mapController: _mapController,
-                      options: MapOptions(
-                        initialCenter: _initialCenter,
-                        initialZoom: 17,
-                        interactionOptions: const InteractionOptions(
-                          flags: InteractiveFlag.all,
-                        ),
-                      ),
-                      children: [
-                        TileLayer(
-                          urlTemplate:
-                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                          userAgentPackageName: 'com.example.my_app',
-                        ),
-                        MarkerLayer(markers: markers),
-                        const RichAttributionWidget(
-                          attributions: [
-                            TextSourceAttribution(
-                              '© OpenStreetMap contributors',
-                            ),
-                          ],
-                        ),
+              // Fill the stack with the map so it uses the full body area
+              Positioned.fill(
+                child: FlutterMap(
+                  mapController: _mapController,
+                  options: MapOptions(
+                    initialCenter: _initialCenter,
+                    initialZoom: 17,
+                    interactionOptions: const InteractionOptions(
+                      flags: InteractiveFlag.all,
+                    ),
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'com.example.my_app',
+                    ),
+                    MarkerLayer(markers: markers),
+                    const RichAttributionWidget(
+                      attributions: [
+                        TextSourceAttribution('© OpenStreetMap contributors'),
                       ],
                     ),
-                  );
-                },
+                  ],
+                ),
               ),
-              Positioned(left: 16, bottom: 16, child: _buildLegend(overview)),
+              // raise legend slightly so it sits above the bottom navigation
+              Positioned(left: 16, bottom: 84, child: _buildLegend(overview)),
             ],
           );
         },
@@ -470,7 +462,35 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text('${lot.name} · ว่าง ${lot.available}/${lot.total}'),
+                  // Show 'เต็ม' when there are no available spots
+                  Builder(
+                    builder: (_) {
+                      final isFull = lot.available == 0;
+                      final statusText = isFull
+                          ? 'เต็ม'
+                          : 'ว่าง ${lot.available}/${lot.total}';
+                      final statusColor = isFull
+                          ? const Color(0xFFEF4444)
+                          : const Color(0xFF22C55E);
+                      return Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '${lot.name} · ',
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                            TextSpan(
+                              text: statusText,
+                              style: TextStyle(
+                                color: statusColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -510,10 +530,12 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
         ? (meta['sensors_map'] as Map).length
         : 0;
     // prefer summaries computed from `current` root
-    final availableRaw = _asInt(
-      summary['available'],
-      sensorsCount != 0 ? sensorsCount : _fallbackTotals[lotId] ?? 0,
-    );
+    // If a summary is provided (computed from `current`) prefer it.
+    // If summary['available'] is missing, conservatively assume 0 available
+    // so we don't accidentally show a lot as free when the live summary is absent.
+    final availableRaw = summary.containsKey('available')
+        ? _asInt(summary['available'], 0)
+        : 0;
     final occupiedRaw = _asInt(summary['occupied'], 0);
 
     final provisionalTotal = totalFromMeta != 0

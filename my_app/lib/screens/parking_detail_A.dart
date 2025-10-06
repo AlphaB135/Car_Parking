@@ -64,7 +64,6 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
         raw['available'] ?? summary['available'],
         sensorsCount - _occupiedLive,
       );
-      // occupied computed from total/available when present
       final updatedAt = summary['updated_at'] ?? raw['updated_at'];
 
       if (!mounted) return;
@@ -233,32 +232,49 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
-                    // 'ข้อมูลเพิ่มเติม' section removed per request
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
-              // Spots grid: live when firebaseEnabled, otherwise local mock
-              firebaseEnabled
-                  ? StreamBuilder<Map<String, Map<String, dynamic>>>(
-                      stream: Rtdb().lotSpotsMap(lotId),
-                      builder: (context, snapshot) {
-                        final map =
-                            snapshot.data ?? <String, Map<String, dynamic>>{};
-                        // show loader while waiting for first data
-                        if (snapshot.connectionState ==
-                                ConnectionState.waiting &&
-                            map.isEmpty) {
-                          return const Padding(
-                            padding: EdgeInsets.all(24),
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-                        return _buildSpotsGridFromMap(context, map);
-                      },
-                    )
-                  : _buildSpotsGridFromMock(),
+              // <CHANGE> Centered parking spots grid with improved styling
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: firebaseEnabled
+                      ? StreamBuilder<Map<String, Map<String, dynamic>>>(
+                          stream: Rtdb().lotSpotsMap(lotId),
+                          builder: (context, snapshot) {
+                            final map =
+                                snapshot.data ??
+                                <String, Map<String, dynamic>>{};
+                            if (snapshot.connectionState ==
+                                    ConnectionState.waiting &&
+                                map.isEmpty) {
+                              return const Padding(
+                                padding: EdgeInsets.all(24),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                            return _buildSpotsGridFromMap(context, map);
+                          },
+                        )
+                      : _buildSpotsGridFromMock(),
+                ),
+              ),
             ],
           ),
         ),
@@ -311,43 +327,47 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
     );
   }
 
+  // <CHANGE> Improved mock grid with better centering and spacing
   Widget _buildSpotsGridFromMock() {
     Widget spot(int i) {
       final occupied = parkingSpots[i];
       return GestureDetector(
         onTap: () => setState(() => parkingSpots[i] = !parkingSpots[i]),
         child: Padding(
-          padding: const EdgeInsets.all(6),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
           child: _buildRealisticParkingSpot(i + 1, occupied, isTopRow: i < 5),
         ),
       );
     }
 
-    final firstRow = Row(children: List<Widget>.generate(5, (i) => spot(i)));
-    final secondRow = Row(
-      children: List<Widget>.generate(5, (i) => spot(i + 5)),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List<Widget>.generate(5, (i) => spot(i)),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List<Widget>.generate(5, (i) => spot(i + 5)),
+        ),
+      ],
     );
-    return Column(children: [firstRow, const SizedBox(height: 8), secondRow]);
   }
 
-  // ...existing code...
-
-  // kept for compatibility; spot rendering now uses grid builders when live
-
+  // <CHANGE> Improved live grid with better centering and spacing
   Widget _buildSpotsGridFromMap(
     BuildContext context,
     Map<String, Map<String, dynamic>> map,
   ) {
-    // Expect keys like '01'..'10'. We will index by numeric key.
-    // If keys are missing, fall back to 1..10
     final items = List<Widget>.generate(10, (i) {
       final key = (i + 1).toString().padLeft(2, '0');
       final entry = map.containsKey(key)
           ? map[key]!
           : <String, dynamic>{'occupied': false};
       final occupied = Rtdb.normalizeOccupied(entry['occupied']);
-      // debug: show raw value and runtimeType
-      // ignore: avoid_print
       print(
         'A spot $key raw=${entry['occupied']} type=${entry['occupied']?.runtimeType} -> $occupied',
       );
@@ -362,96 +382,107 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
             await Rtdb().toggleSpot(lotId, spotId);
           } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  '\u0e2d\u0e31\u0e1b\u0e40\u0e14\u0e15\u0e2a\u0e16\u0e32\u0e19\u0e30\u0e0a\u0e48\u0e2d\u0e07\u0e08\u0e2d\u0e14\u0e44\u0e21\u0e48\u0e2a\u0e33',
-                ),
-              ),
+              const SnackBar(content: Text('อัปเดตสถานะช่องจอดไม่สำเร็จ')),
             );
           }
         },
         child: Padding(
-          padding: const EdgeInsets.all(6),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
           child: _buildRealisticParkingSpot(i + 1, occupied, isTopRow: i < 5),
         ),
       );
     });
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(children: items.sublist(0, 5)),
-        const SizedBox(height: 8),
-        Row(children: items.sublist(5)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: items.sublist(0, 5),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: items.sublist(5),
+        ),
       ],
     );
   }
 
+  // <CHANGE> Enhanced parking spot design with better shadows and borders
   Widget _buildRealisticParkingSpot(
     int number,
     bool isOccupied, {
     required bool isTopRow,
   }) {
     return SizedBox(
-      width: 55,
-      height: 80,
+      width: 58,
+      height: 85,
       child: Stack(
         children: [
+          // Background
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(4),
+              color: const Color(0xFFF8F8F8),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.grey[300]!, width: 1),
             ),
           ),
+          // Left border
           Positioned(
-            left: 2,
-            top: isTopRow ? 0 : 8,
-            bottom: isTopRow ? 8 : 0,
+            left: 3,
+            top: isTopRow ? 0 : 10,
+            bottom: isTopRow ? 10 : 0,
             child: Container(
-              width: 3,
+              width: 3.5,
               decoration: BoxDecoration(
-                color: const Color(0xFF333333),
-                borderRadius: BorderRadius.circular(1.5),
+                color: const Color(0xFF424242),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
+          // Right border
           Positioned(
-            right: 2,
-            top: isTopRow ? 0 : 8,
-            bottom: isTopRow ? 8 : 0,
+            right: 3,
+            top: isTopRow ? 0 : 10,
+            bottom: isTopRow ? 10 : 0,
             child: Container(
-              width: 3,
+              width: 3.5,
               decoration: BoxDecoration(
-                color: const Color(0xFF333333),
-                borderRadius: BorderRadius.circular(1.5),
+                color: const Color(0xFF424242),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
+          // Top/Bottom border
           Positioned(
-            left: 2,
-            right: 2,
+            left: 3,
+            right: 3,
             top: isTopRow ? null : 0,
             bottom: isTopRow ? 0 : null,
             child: Container(
-              height: 3,
+              height: 3.5,
               decoration: BoxDecoration(
-                color: const Color(0xFF333333),
-                borderRadius: BorderRadius.circular(1.5),
+                color: const Color(0xFF424242),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
+          // Car/Parking indicator
           if (isOccupied)
             Center(
               child: Container(
-                width: 35,
-                height: 50,
+                width: 38,
+                height: 55,
                 decoration: BoxDecoration(
-                  color: Colors.red[700],
-                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.red[600],
+                  borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.12),
-                      blurRadius: 3,
-                      offset: const Offset(0, 1),
+                      color: Colors.red.withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -461,14 +492,14 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
                     const Icon(
                       Icons.directions_car,
                       color: Colors.white,
-                      size: 20,
+                      size: 24,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       '$number',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -479,17 +510,17 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
           if (!isOccupied)
             Center(
               child: Container(
-                width: 35,
-                height: 50,
+                width: 38,
+                height: 55,
                 decoration: BoxDecoration(
                   color: Colors.green[600],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white, width: 2),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.white, width: 2.5),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 4,
-                      offset: const Offset(0, 1),
+                      color: Colors.green.withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -499,14 +530,14 @@ class _ParkingDetailAScreenState extends State<ParkingDetailAScreen> {
                     const Icon(
                       Icons.local_parking,
                       color: Colors.white,
-                      size: 20,
+                      size: 24,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       '$number',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

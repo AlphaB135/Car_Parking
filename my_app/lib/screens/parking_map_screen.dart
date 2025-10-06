@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -69,30 +70,45 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
 
           return Stack(
             children: [
-              FlutterMap(
-                mapController: _mapController,
-                options: MapOptions(
-                  initialCenter: _initialCenter,
-                  initialZoom: 17,
-                  interactionOptions: const InteractionOptions(
-                    flags: InteractiveFlag.all,
-                  ),
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.example.my_app',
-                  ),
-                  MarkerLayer(markers: markers),
-                  const RichAttributionWidget(
-                    attributions: [
-                      TextSourceAttribution('© OpenStreetMap contributors'),
-                    ],
-                  ),
-                ],
+              // Add bottom padding so marker widgets won't overflow under
+              // the bottom navigation bar or system insets when placed near
+              // the bottom of the map.
+              Builder(
+                builder: (context) {
+                  final bottomNavHeight = kBottomNavigationBarHeight; // 56.0
+                  final safeBottom = MediaQuery.of(context).padding.bottom;
+                  final pad = bottomNavHeight + safeBottom + 16.0;
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: pad),
+                    child: FlutterMap(
+                      mapController: _mapController,
+                      options: MapOptions(
+                        initialCenter: _initialCenter,
+                        initialZoom: 17,
+                        interactionOptions: const InteractionOptions(
+                          flags: InteractiveFlag.all,
+                        ),
+                      ),
+                      children: [
+                        TileLayer(
+                          urlTemplate:
+                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          userAgentPackageName: 'com.example.my_app',
+                        ),
+                        MarkerLayer(markers: markers),
+                        const RichAttributionWidget(
+                          attributions: [
+                            TextSourceAttribution(
+                              '© OpenStreetMap contributors',
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
-              Positioned(right: 16, bottom: 16, child: _buildLegend(overview)),
+              Positioned(left: 16, bottom: 16, child: _buildLegend(overview)),
             ],
           );
         },
@@ -158,7 +174,8 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
       setState(() {
         _userPosition = userLatLng;
       });
-      _mapController.move(userLatLng, 18);
+      // Fit map so both user and lots are visible together
+      _fitMapToIncludeUserAndLots();
     } catch (e) {
       _showMessage('ระบุตำแหน่งไม่สำเร็จ: $e');
     } finally {
@@ -167,6 +184,51 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
         _requestingLocation = false;
       });
     }
+  }
+
+  void _fitMapToIncludeUserAndLots() {
+    final points = <LatLng>[];
+    points.addAll(_lotCoordinates.values);
+    if (_userPosition != null) points.add(_userPosition!);
+    if (points.isEmpty) return;
+
+    double minLat = points.first.latitude;
+    double maxLat = points.first.latitude;
+    double minLng = points.first.longitude;
+    double maxLng = points.first.longitude;
+
+    for (final p in points) {
+      minLat = math.min(minLat, p.latitude);
+      maxLat = math.max(maxLat, p.latitude);
+      minLng = math.min(minLng, p.longitude);
+      maxLng = math.max(maxLng, p.longitude);
+    }
+
+    // Some flutter_map versions don't expose fitBounds on MapController.
+    // Use a safe heuristic: compute the center and pick a zoom according to span.
+    final centerLat = (minLat + maxLat) / 2;
+    final centerLng = (minLng + maxLng) / 2;
+    final latSpan = (maxLat - minLat).abs();
+    final lngSpan = (maxLng - minLng).abs();
+    final maxSpan = math.max(latSpan, lngSpan);
+
+    // Heuristic zoom levels (approx): smaller span -> higher zoom
+    double zoom;
+    if (maxSpan < 0.0005) {
+      zoom = 19;
+    } else if (maxSpan < 0.002) {
+      zoom = 18;
+    } else if (maxSpan < 0.01) {
+      zoom = 16;
+    } else if (maxSpan < 0.05) {
+      zoom = 14;
+    } else if (maxSpan < 0.5) {
+      zoom = 12;
+    } else {
+      zoom = 10;
+    }
+
+    _mapController.move(LatLng(centerLat, centerLng), zoom);
   }
 
   void _showMessage(String message) {
@@ -265,81 +327,100 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
   ) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
         final occupied = total - available;
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    lotData.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.location_on, size: 18, color: Colors.grey),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      lotData.location,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
+        // Wrap content in SingleChildScrollView so it can shrink/scroll on small screens
+        return SingleChildScrollView(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        lotData.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  _buildInfoChip('ทั้งหมด', '$total', const Color(0xFF1E88E5)),
-                  const SizedBox(width: 12),
-                  _buildInfoChip('ว่าง', '$available', const Color(0xFF059669)),
-                  const SizedBox(width: 12),
-                  _buildInfoChip(
-                    'ไม่ว่าง',
-                    '$occupied',
-                    const Color(0xFFDC2626),
-                  ),
-                ],
-              ),
-              if (lotData.updatedAtLabel != null) ...[
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.location_on, size: 18, color: Colors.grey),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        lotData.location,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 12),
-                Text(
-                  'อัปเดตล่าสุด ${lotData.updatedAtLabel}',
-                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                Row(
+                  children: [
+                    _buildInfoChip(
+                      'ทั้งหมด',
+                      '$total',
+                      const Color(0xFF1E88E5),
+                    ),
+                    const SizedBox(width: 12),
+                    _buildInfoChip(
+                      'ว่าง',
+                      '$available',
+                      const Color(0xFF059669),
+                    ),
+                    const SizedBox(width: 12),
+                    _buildInfoChip(
+                      'ไม่ว่าง',
+                      '$occupied',
+                      const Color(0xFFDC2626),
+                    ),
+                  ],
                 ),
+                if (lotData.updatedAtLabel != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    'อัปเดตล่าสุด ${lotData.updatedAtLabel}',
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton.icon(
+                    onPressed: () =>
+                        Navigator.pushReplacementNamed(context, lotData.route),
+                    icon: const Icon(Icons.directions_car, size: 18),
+                    label: const Text('ดูรายละเอียด'),
+                  ),
+                ),
+                const SizedBox(height: 24),
               ],
-              const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerRight,
-                child: ElevatedButton.icon(
-                  onPressed: () =>
-                      Navigator.pushReplacementNamed(context, lotData.route),
-                  icon: const Icon(Icons.directions_car, size: 18),
-                  label: const Text('ดูรายละเอียด'),
-                ),
-              ),
-            ],
+            ),
           ),
         );
       },

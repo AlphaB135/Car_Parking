@@ -41,6 +41,12 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	
+	<!-- Location permission descriptions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>เพื่อแสดงตำแหน่งของคุณบนแผนที่ที่จอดรถ</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>เพื่อให้แอปสามารถอัปเดตตำแหน่งของคุณขณะใช้งานและปรับมุมมองแผนที่</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

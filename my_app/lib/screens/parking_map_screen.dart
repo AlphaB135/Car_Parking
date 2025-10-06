@@ -17,9 +17,9 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
   final MapController _mapController = MapController();
 
   final Map<String, LatLng> _lotCoordinates = const {
-    'A': LatLng(13.736717, 100.523186),
-    'B': LatLng(13.737617, 100.523986),
-    'C': LatLng(13.735917, 100.522686),
+    'A': LatLng(9.09277839791744, 99.35548926284324),
+    'B': LatLng(9.09561665008815, 99.35826690037293),
+    'C': LatLng(9.097065444160801, 99.35790901681625),
   };
 
   final Map<String, String> _fallbackNames = const {
